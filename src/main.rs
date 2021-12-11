@@ -10,7 +10,7 @@ pub extern "C" fn _start() -> ! {
 
     hash_os::init(); // init os
 
-    println!("Hello World{}", "!");
+    println!("Hello to hash_os prerelease.\nThe QEMU escape key is {}", "ctrl-alt-G");
 
     // insert breakpoint, should trigger interrupt
     x86_64::instructions::interrupts::int3(); 

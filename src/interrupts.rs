@@ -90,10 +90,31 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     let mut port = Port::new(0x60);
 
     let scancode: u8 = unsafe { port.read() };
+    // scancode 14 is backspace and 83 is delete
+    // unicde 0x08 is backspace and 0x7f is delete
     if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+
+
+
         if let Some(key) = keyboard.process_keyevent(key_event) {
+            // print!("{:?}{:?} ", scancode, key);
+            // if scancode == 
+
             match key {
-                DecodedKey::Unicode(character) => print!("{}", character),
+                DecodedKey::Unicode(character)  => {
+                    // TODO: handle backspace and del properly in vga_buffer
+                    if character == '\x08' {
+                        print!("[BAK]");
+                    } else if character == '\x7f'  {
+                        print!("[DEL]");
+                    } else {
+                        print!("{}", character);
+                    }
+                }
+                // '\x08' => print!("[BAK]"),
+                // _ => print!(key),
+                // DecodedKey::Unicode(character) => print!("{}", character),
+                // _ => print!("{:?}", key),
                 DecodedKey::RawKey(key) => print!("{:?}", key),
             }
         }
