@@ -8,6 +8,7 @@ use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use crate::vga_buffer::backspace;
 
 
 use core::result::Result::Ok;
@@ -63,12 +64,26 @@ extern "x86-interrupt" fn double_fault_handler(
     stack_frame: InterruptStackFrame,
     _error_code: u64,
 ) -> ! {
+// {
+    println!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+    
+    // use crate::main::_start;
+    crate::_start();
+    // _start();
     panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+    // crate::_start();
 }
 
 // timer handler, maybe shouldn't do anything?
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    // print!(".");
+    print!(".");// 0x8 is backspace
+    for _i in 0..20000 { // to generate "blink" effect!
+        
+    }
+
+    backspace(true);
+    // backspace(true);
+
     unsafe {
         PICS.lock()
             .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
@@ -79,6 +94,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
     use spin::Mutex;
     use x86_64::instructions::port::Port;
+    
 
     lazy_static! {
         static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> = Mutex::new(
@@ -104,9 +120,11 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
                 DecodedKey::Unicode(character)  => {
                     // TODO: handle backspace and del properly in vga_buffer
                     if character == '\x08' {
-                        print!("[BAK]");
+                        // print!("[BAK]");
+                        backspace(true);
                     } else if character == '\x7f'  {
-                        print!("[DEL]");
+                        // print!("[DEL]");
+                        backspace(false);
                     } else {
                         print!("{}", character);
                     }

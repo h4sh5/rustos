@@ -82,6 +82,8 @@ impl Writer {
     /// Writes an ASCII byte to the buffer.
     ///
     /// Wraps lines at `BUFFER_WIDTH`. Supports the `\n` newline character.
+    /// #: doesn't need to write every single char (refresh display) again 
+    /// because those characters will already be on the screen/device mem
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
@@ -141,6 +143,30 @@ impl Writer {
             self.buffer.chars[row][col].write(blank);
         }
     }
+
+    /// deleting charracters before (backspace) or after (DEL)
+    /// might need to support arrow keys and cursors eventually too so that
+    /// DEL works properly
+    /// if backspace, count should be negative (go backwards)
+    pub fn _backspace(&mut self, backwards: bool) {
+        // count can be positive or negative, basically clears bytes
+        // in that "direction" in the buffer
+        if backwards {
+            if self.column_position > 0 { // don't let it run over
+                self.column_position -= 1; 
+                self.write_byte(' ' as u8);
+                self.column_position -= 1;  // restore cursor position
+            }
+            
+        } else {
+            if self.column_position < BUFFER_WIDTH { // don't let it run over
+                self.column_position += 1;
+                self.write_byte(' ' as u8);
+                self.column_position += 1; 
+            }
+        }
+        
+    }
 }
 
 impl fmt::Write for Writer {
@@ -172,4 +198,14 @@ pub fn _print(args: fmt::Arguments) {
     interrupts::without_interrupts(|| {     // disable interrupts as long as the Mutex is locked:
         WRITER.lock().write_fmt(args).unwrap();
     });
+}
+
+
+pub fn backspace(backwards: bool) {
+    use core::fmt::Write;
+    use x86_64::instructions::interrupts;
+
+    // interrupts::without_interrupts(|| {     // disable interrupts as long as the Mutex is locked:
+    WRITER.lock()._backspace(backwards);
+    // });
 }
