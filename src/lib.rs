@@ -26,7 +26,7 @@ pub extern "C" fn _start() -> ! {
 }
 
 pub fn init() {
-    // gdt::init();
+    gdt::init();
     interrupts::init_idt();
     unsafe { interrupts::PICS.lock().initialize() }; // new
     x86_64::instructions::interrupts::enable();     // should be sti - enable interrupt

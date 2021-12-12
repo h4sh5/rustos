@@ -63,15 +63,14 @@ extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
 
 extern "x86-interrupt" fn double_fault_handler(
     stack_frame: InterruptStackFrame,
-    _error_code: u64,
+    error_code: u64,
 ) -> ! {
 // {
-    println!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+    // println!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
     
-    // use crate::main::_start;
-    crate::_start();
-    // _start();
-    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+    // crate::_start();
+
+    panic!("EXCEPTION: DOUBLE FAULT (code {})\n{:#?}",error_code, stack_frame);
     // crate::_start();
 }
 
