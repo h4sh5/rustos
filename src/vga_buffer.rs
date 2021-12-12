@@ -11,7 +11,9 @@ lazy_static! {
         column_position: 0,
         color_code: ColorCode::new(Color::LightGreen, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+        current_char: ' '
     });
+
 }
 
 /// The standard color palette in VGA text mode.
@@ -76,6 +78,7 @@ pub struct Writer {
     // TODO: track row position too?
     column_position: usize,
     color_code: ColorCode,
+    pub current_char: char, // XXX: remove this hack
     buffer: &'static mut Buffer,
 }
 

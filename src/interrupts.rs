@@ -1,5 +1,5 @@
 
-#![no_std]
+// #![no_std]
 
 
 // use crate::{gdt, print, println};
@@ -8,7 +8,7 @@ use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
-use crate::vga_buffer::{backspace, cursor_left, cursor_right};
+use crate::vga_buffer::{backspace, cursor_left, cursor_right, WRITER};
 
 
 use core::result::Result::Ok;
@@ -23,6 +23,7 @@ pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
     Keyboard,
 }
+
 
 impl InterruptIndex {
     fn as_u8(self) -> u8 {
@@ -117,6 +118,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
 
             match key {
                 DecodedKey::Unicode(character)  => {
+
                     // TODO: handle backspace and del properly in vga_buffer
                     if character == '\x08' {
                         // print!("[BAK]");
@@ -125,13 +127,11 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
                         // print!("[DEL]");
                         backspace(false);
                     } else {
+                        WRITER.lock().current_char = character;
                         print!("{}", character);
                     }
                 }
-                // '\x08' => print!("[BAK]"),
-                // _ => print!(key),
-                // DecodedKey::Unicode(character) => print!("{}", character),
-                // _ => print!("{:?}", key),
+
                 DecodedKey::RawKey(key) => {
                     match key {
                         KeyCode::ArrowLeft => cursor_left(),
