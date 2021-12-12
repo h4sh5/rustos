@@ -9,7 +9,7 @@ lazy_static! {
     /// Used by the `print!` and `println!` macros.
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
+        color_code: ColorCode::new(Color::LightGreen, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
     });
 }
@@ -73,6 +73,7 @@ struct Buffer {
 /// Wraps lines at `BUFFER_WIDTH`. Supports newline characters and implements the
 /// `core::fmt::Write` trait.
 pub struct Writer {
+    // TODO: track row position too?
     column_position: usize,
     color_code: ColorCode,
     buffer: &'static mut Buffer,
@@ -167,6 +168,16 @@ impl Writer {
         }
         
     }
+
+    pub fn _cursor_left(&mut self) {
+        self.column_position -= 1;
+    }
+
+    pub fn _cursor_right(&mut self) {
+        self.column_position += 1;
+    }
+
+    // add cursor up and down?
 }
 
 impl fmt::Write for Writer {
@@ -202,10 +213,17 @@ pub fn _print(args: fmt::Arguments) {
 
 
 pub fn backspace(backwards: bool) {
-    use core::fmt::Write;
-    use x86_64::instructions::interrupts;
 
     // interrupts::without_interrupts(|| {     // disable interrupts as long as the Mutex is locked:
     WRITER.lock()._backspace(backwards);
     // });
+}
+
+pub fn cursor_left() {
+    WRITER.lock()._cursor_left();
+}
+
+
+pub fn cursor_right() {
+    WRITER.lock()._cursor_right();
 }

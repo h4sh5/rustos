@@ -8,7 +8,7 @@ use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
-use crate::vga_buffer::backspace;
+use crate::vga_buffer::{backspace, cursor_left, cursor_right};
 
 
 use core::result::Result::Ok;
@@ -76,13 +76,12 @@ extern "x86-interrupt" fn double_fault_handler(
 
 // timer handler, maybe shouldn't do anything?
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    print!(".");// 0x8 is backspace
+    print!("_");// 0x8 is backspace
     for _i in 0..20000 { // to generate "blink" effect!
-        
+
     }
 
     backspace(true);
-    // backspace(true);
 
     unsafe {
         PICS.lock()
@@ -91,7 +90,7 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
 }
 
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
+    use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1, KeyCode};
     use spin::Mutex;
     use x86_64::instructions::port::Port;
     
@@ -133,7 +132,15 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
                 // _ => print!(key),
                 // DecodedKey::Unicode(character) => print!("{}", character),
                 // _ => print!("{:?}", key),
-                DecodedKey::RawKey(key) => print!("{:?}", key),
+                DecodedKey::RawKey(key) => {
+                    match key {
+                        KeyCode::ArrowLeft => cursor_left(),
+                        KeyCode::ArrowRight => cursor_right(),
+                        _=> print!("({:?})", key),
+                    }
+                    
+
+                }
             }
         }
     }

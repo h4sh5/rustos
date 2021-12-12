@@ -14,12 +14,12 @@ pub extern "C" fn _start() -> ! {
     // hash_os::init(); // init os
     init();
 
-    println!("Hello to hash_os prerelease.\nThe QEMU escape key is {}", "ctrl-alt-G");
+    println!("Hello to #OS prerelease.\nThe QEMU escape key is {}", "ctrl-alt-G");
 
     // insert breakpoint, should trigger interrupt
-    x86_64::instructions::interrupts::int3(); 
+    // x86_64::instructions::interrupts::int3(); 
 
-    println!("It did not crash!");
+    // println!("It did not crash!");
 
     loop {}
 }
