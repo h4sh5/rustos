@@ -2,11 +2,10 @@
 #![feature(abi_x86_interrupt)]
 
 
-// pub mod gdt;
+pub mod gdt;
 pub mod interrupts;
 // pub mod serial;
 pub mod vga_buffer;
-// pub mod main;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
