@@ -6,7 +6,9 @@ use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
-use crate::vga_buffer::{backspace, cursor_left, cursor_right, WRITER};
+use crate::vga_buffer::{backspace, cursor_left, cursor_right, 
+    WRITER, BUFFER_WIDTH};
+use crate::cmd::{PROMPT, handle_cmd};
 
 
 use core::result::Result::Ok;
@@ -124,8 +126,24 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
                     } else if character == '\x7f'  {
                         // print!("[DEL]");
                         backspace(false);
+                    } else if character == '\n' {
+                        // run command
+                        let mut line: [char; BUFFER_WIDTH] = [0 as char;80];
+                        WRITER.lock().get_prev_line(&mut line);
+                        
+                        println!();
+                        print!("<");
+                        for c in line {
+                           
+                            if c != '\0' {
+                                 print!("{}", c);
+                            }
+
+                        }
+                        handle_cmd(&line);
+                        print!("{}",PROMPT);
                     } else {
-                        WRITER.lock().current_char = character;
+                        
                         print!("{}", character);
                     }
                 }

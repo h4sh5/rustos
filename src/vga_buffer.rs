@@ -11,7 +11,6 @@ lazy_static! {
         column_position: 0,
         color_code: ColorCode::new(Color::LightGreen, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-        current_char: ' '
     });
 
 }
@@ -60,9 +59,9 @@ struct ScreenChar {
 }
 
 /// The height of the text buffer (normally 25 lines).
-const BUFFER_HEIGHT: usize = 25;
+pub const BUFFER_HEIGHT: usize = 25;
 /// The width of the text buffer (normally 80 columns).
-const BUFFER_WIDTH: usize = 80;
+pub const BUFFER_WIDTH: usize = 80;
 
 /// A structure representing the VGA text buffer.
 #[repr(transparent)]
@@ -78,7 +77,6 @@ pub struct Writer {
     // TODO: track row position too?
     column_position: usize,
     color_code: ColorCode,
-    pub current_char: char, // XXX: remove this hack
     buffer: &'static mut Buffer,
 }
 
@@ -126,7 +124,10 @@ impl Writer {
     }
 
     /// Shifts all lines one line up and clears the last row.
+    /// interpret line input if a command matches, by storing the last line
     fn new_line(&mut self) {
+        
+        // this nested loop shifts all lines up line up
         for row in 1..BUFFER_HEIGHT {
             for col in 0..BUFFER_WIDTH {
                 let character = self.buffer.chars[row][col].read();
@@ -135,6 +136,15 @@ impl Writer {
         }
         self.clear_row(BUFFER_HEIGHT - 1);
         self.column_position = 0;
+    }
+
+    pub fn get_prev_line(&self,  line: &mut [char; BUFFER_WIDTH]) {
+        // let line: [char; BUFFER_WIDTH];
+
+        for col in 1..BUFFER_WIDTH {
+            line[col-1] = self.buffer.chars[BUFFER_HEIGHT-1][col].read().ascii_character as char;
+            // self.buffer.chars[row - 1][col].write(character);
+        }
     }
 
     /// Clears a row by overwriting it with blank characters.
@@ -230,3 +240,4 @@ pub fn cursor_left() {
 pub fn cursor_right() {
     WRITER.lock()._cursor_right();
 }
+

@@ -6,6 +6,8 @@ pub mod gdt;
 pub mod interrupts;
 // pub mod serial;
 pub mod vga_buffer;
+pub mod cmd;
+pub mod strutils;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
@@ -19,7 +21,7 @@ pub extern "C" fn _start() -> ! {
     // x86_64::instructions::interrupts::int3(); 
 
     // println!("It did not crash!");
-
+    print!("{}", crate::cmd::PROMPT);
     loop {}
 }
 
