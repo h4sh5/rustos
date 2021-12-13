@@ -55,13 +55,15 @@ pub fn kernel_main(boot_info: &'static BootInfo) -> ! {
     // println!("It did not crash!");
 
 
-    /////////////// memory stuff
+    //------------- memory stuff
     use x86_64::VirtAddr;
     use x86_64::structures::paging::Page;
+    use x86_64::structures::paging::PageTableFlags as Flags;
     use crate::memory::{self, BootInfoFrameAllocator};
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
+
 
     // map an unused (virtual) page
     let page = Page::containing_address(VirtAddr::new(0xdeadbeaf000));
@@ -71,7 +73,10 @@ pub fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
     unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e) };
 
-    ///////////////
+    //-------------
+
+    // mapping back the kernel page
+    memory::create_mapping(page, &mut mapper, &mut frame_allocator, 0x200000, 0x240000, Flags::PRESENT);
 
 
     print!("{}", crate::cmd::PROMPT);

@@ -281,6 +281,18 @@ extern "x86-interrupt" fn segment_not_present_handler (
             print!("{:#04x} ", *(ptr as *mut u8));
         }
     }
+    // restore keyboard and timer interrupts
+
+    unsafe {
+        PICS.lock()
+            .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
+        PICS.lock()
+            .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
+    }
+    //restart?
+    crate::kernel_main(OSINFO.lock().bootinfo);
+
+
 }
 
 

@@ -1,10 +1,12 @@
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use x86_64::{
     structures::paging::{
-        FrameAllocator, Mapper, OffsetPageTable, Page, PageTable, PhysFrame, Size4KiB,
+        FrameAllocator, Mapper, OffsetPageTable, Page, PageTable, PhysFrame, Size4KiB,Size2MiB
     },
     PhysAddr, VirtAddr,
 };
+use x86_64::structures::paging::PageTableFlags as Flags;
+use crate::println;
 
 /// Initialize a new OffsetPageTable.
 ///
@@ -41,7 +43,7 @@ pub fn create_example_mapping(
     mapper: &mut OffsetPageTable,
     frame_allocator: &mut impl FrameAllocator<Size4KiB>,
 ) {
-    use x86_64::structures::paging::PageTableFlags as Flags;
+    
 
     let frame = PhysFrame::containing_address(PhysAddr::new(0xb8000));
     let flags = Flags::PRESENT | Flags::WRITABLE;
@@ -51,6 +53,29 @@ pub fn create_example_mapping(
         mapper.map_to(page, frame, flags, frame_allocator)
     };
     map_to_result.expect("map_to failed").flush();
+}
+
+pub fn create_mapping(page: Page,
+    mapper: &mut OffsetPageTable,
+    frame_allocator: &mut impl FrameAllocator<Size4KiB>,
+    start_frame_addr: u64,
+    end_frame_addr: u64,
+    flags: Flags,
+    
+) {
+
+
+    for frame_addr in (start_frame_addr..end_frame_addr).step_by(4096) {  //4KiB each
+        let frame = PhysFrame::containing_address(PhysAddr::new(frame_addr));
+        let map_to_result = unsafe {
+            // FIXME: this is not safe, we do it only for testing
+            mapper.map_to(page, frame, flags, frame_allocator)
+        };
+        // println!("{:?}", map_to_result);
+        // map_to_result.expect("map_to failed").flush();
+    }
+    
+
 }
 
 /// A FrameAllocator that always returns `None`.

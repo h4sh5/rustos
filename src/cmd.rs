@@ -2,7 +2,6 @@ use crate::vga_buffer::{BUFFER_WIDTH};
 use crate::strutils::{strcmpl};
 use crate::{println, OSINFO};
 
-
 pub const PROMPT: char = '>';
 
 // pub fn bytes2chars(bs: &mut [char; BUFFER_WIDTH], chars: &mut [char; BUFFER_WIDTH]) {
@@ -19,6 +18,7 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
     		"break: trigger breakpoint (c3)\n",
     		"pagefault: trigger pagefault\n",
     		"bootinfo: show boot info\n",
+    		// "snph: trigger segment_not_present_handler\n",
     		"The QEMU escape key is Ctrl-Alt-G\n",
     		)
 		)
@@ -45,7 +45,5 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
 
 	}
 
-
-
-
+	
 }
