@@ -183,11 +183,18 @@ impl Writer {
     }
 
     pub fn _cursor_left(&mut self) {
-        self.column_position -= 1;
+
+        if self.column_position > 0 { // don't let it run over
+            self.column_position -= 1; 
+        }
+        
+        
     }
 
     pub fn _cursor_right(&mut self) {
-        self.column_position += 1;
+        if self.column_position < BUFFER_WIDTH { // don't let it run over
+            self.column_position += 1;
+        }
     }
 
     // add cursor up and down?
