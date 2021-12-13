@@ -18,7 +18,7 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
     		"help: show help\n",
     		"break: trigger breakpoint (c3)\n",
     		"pagefault: trigger pagefault\n",
-    		"memregions: show mem regions from boot info\n",
+    		"bootinfo: show boot info\n",
     		)
 		)
 
@@ -37,6 +37,7 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
 
 	}
 
+	// "bootinfo".chars().count() will generate count at compile time, found out by RE
 	if strcmpl(input, "bootinfo", "bootinfo".chars().count()) {
 		// read memory regions
 		println!("{:?}", OSINFO.lock().bootinfo);
