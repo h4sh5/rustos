@@ -1,6 +1,6 @@
 #![no_std]
 #![feature(abi_x86_interrupt)]
-
+#![feature(asm)]
 
 pub mod gdt;
 pub mod interrupts;
@@ -29,6 +29,32 @@ pub struct OSInfoStore {
     bootinfo: &'static BootInfo,
 }
 
+/// read msr , 11 is if APIC is supported 
+/// http://perfinsp.sourceforge.net/msr.html
+pub fn get_msr(msr:u32) {
+    let lo:u32;
+    let hi:u32;
+    unsafe {
+        asm!(
+            // "mov rcx, {0}",
+            // rdmsr rcx, rax, rdi  ; rcx is the input, rax (eax) and rdi (edx) are outputs
+            "rdmsr",
+            // "mov {1}, eax",
+            // "mov {2}, edx",
+            // "add {0}, {number}",
+            in("rcx") msr,
+            out("eax") lo,
+            out("edx") hi,
+            options(nostack)
+            // out(reg) lo,
+            // out(reg) hi,
+            
+        );
+    }
+    
+    println!("lo:{:#04x} hi:{:#04x}", lo, hi);
+
+}
 
 entry_point!(kernel_main);
 

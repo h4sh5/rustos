@@ -10,6 +10,8 @@ pub const PROMPT: char = '>';
 // 	}
 // }
 
+const IA32_APIC_BASE_MSR:u32 = 0x1B;
+
 pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
 
 	if strcmpl(input, "help", 4) {
@@ -42,6 +44,14 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
 	if strcmpl(input, "bootinfo", "bootinfo".chars().count()) {
 		// read memory regions
 		println!("{:?}", OSINFO.lock().bootinfo);
+
+	}
+
+	if strcmpl(input, "msr_acpi", "msr_acpi".chars().count()) {
+		// read memory regions
+
+		// println!("{:?}", OSINFO.lock().bootinfo);
+		crate::get_msr(IA32_APIC_BASE_MSR);
 
 	}
 

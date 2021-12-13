@@ -16,8 +16,8 @@ use crate::hlt_loop;
 use core::result::Result::Ok;
 use core::option::Option::Some;
 
-pub const PIC_1_OFFSET: u8 = 32;
-pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
+pub const PIC_1_OFFSET: u8 = 32;  /// 0x20 (anything > 0x20 belongs to the APIC)
+pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8; // keyboard: 40 - 0x28
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
@@ -41,17 +41,29 @@ pub static PICS: spin::Mutex<ChainedPics> =
     spin::Mutex::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });
 
 lazy_static! {
-    static ref IDT: InterruptDescriptorTable = {
+    static ref IDT: InterruptDescriptorTable = { /// there are 255 entries
         let mut idt = InterruptDescriptorTable::new();
+
+        /// set up every IRQ w/ a default handler
+        for i in 0x21..0xff {
+            idt[i].set_handler_fn(default_exception_handler);
+        }
+
+        // just for some hardware
+        idt[44].set_handler_fn(int_44_handler);
+
         idt.breakpoint.set_handler_fn(breakpoint_handler);
         unsafe {
             idt.double_fault
                 .set_handler_fn(double_fault_handler)
                 .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
         }
+
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
         idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
         idt.page_fault.set_handler_fn(page_fault_handler);
+
+
 
         // rest of the handlers to prevent double faults
         idt.divide_error.set_handler_fn(divide_error_handler);
@@ -79,6 +91,15 @@ lazy_static! {
 pub fn init_idt() {
     IDT.load();
 }
+
+extern "x86-interrupt" fn default_exception_handler(_stack_frame: InterruptStackFrame) {
+    // println!("default_exception_handler");
+}
+
+extern "x86-interrupt" fn int_44_handler(_stack_frame: InterruptStackFrame) {
+    println!("interrupt 44");
+}
+
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
@@ -116,7 +137,13 @@ extern "x86-interrupt" fn page_fault_handler(
     hlt_loop();
 }
 
-// timer handler, maybe shouldn't do anything?
+
+/// dfeault interrupt handler just to prevent segment not present exceptions
+extern "x86-interrupt" fn default_interrupt_handler(_stack_frame: InterruptStackFrame) {
+
+}
+
+/// timer handler, maybe shouldn't do anything?
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
     print!("_");// 0x8 is backspace
     for _i in 0..20000 { // to generate "blink" effect!
@@ -131,6 +158,8 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
     }
 }
 
+
+/// read keyboard input and do stuff (selector/entry 40)
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
     use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1, KeyCode};
     use spin::Mutex;
@@ -273,6 +302,7 @@ extern "x86-interrupt" fn segment_not_present_handler (
     stack_frame: InterruptStackFrame, ec:u64) {
 
     println!("EXCEPTION: segment_not_present: errcode {}", ec);
+    println!("External?:{} Table:{} Index:{}", ec & 1, ec & 0b110, (ec & 0b111111000) >> 3);
     println!("{:#?}", stack_frame);
     // read from it to dump some bytes
     unsafe {
@@ -358,9 +388,6 @@ extern "x86-interrupt" fn security_exception_handler (
     println!("EXCEPTION: security_exception errcode {}", ec);
     println!("{:#?}", stack_frame);
 }
-
-
-
 
 // #[test_case]
 // fn test_breakpoint_exception() {
