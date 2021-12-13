@@ -10,7 +10,7 @@ use crate::vga_buffer::{backspace, cursor_left, cursor_right,
     WRITER, BUFFER_WIDTH};
 
 use crate::cmd::{PROMPT, handle_cmd};
-use crate::hlt_loop;
+// use crate::hlt_loop;
 
 use core::result::Result::Ok;
 use core::option::Option::Some;
@@ -145,8 +145,6 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     // scancode 14 is backspace and 83 is delete
     // unicde 0x08 is backspace and 0x7f is delete
     if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-
-
 
         if let Some(key) = keyboard.process_keyevent(key_event) {
             // print!("{:?}{:?} ", scancode, key);

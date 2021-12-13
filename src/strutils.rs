@@ -1,5 +1,4 @@
 use crate::vga_buffer::{BUFFER_WIDTH};
-use crate::{println};
 
 /// compare 2 char arrays bounded by n, 
 /// returns true if they are identical

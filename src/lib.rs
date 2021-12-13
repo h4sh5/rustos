@@ -11,8 +11,6 @@ pub mod strutils;
 
 use lazy_static::lazy_static;
 use bootloader::{BootInfo,entry_point};
-use core::mem::MaybeUninit;
-use core::ptr;
 use spin::Mutex;
 
 

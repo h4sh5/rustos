@@ -1,6 +1,6 @@
 use crate::vga_buffer::{BUFFER_WIDTH};
 use crate::strutils::{strcmpl};
-use crate::{print, println, OSINFO};
+use crate::{println, OSINFO};
 
 
 pub const PROMPT: char = '>';
@@ -19,6 +19,7 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
     		"break: trigger breakpoint (c3)\n",
     		"pagefault: trigger pagefault\n",
     		"bootinfo: show boot info\n",
+    		"The QEMU escape key is Ctrl-Alt-G\n",
     		)
 		)
 
