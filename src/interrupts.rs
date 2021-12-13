@@ -10,7 +10,8 @@ use crate::vga_buffer::{backspace, cursor_left, cursor_right,
     WRITER, BUFFER_WIDTH};
 
 use crate::cmd::{PROMPT, handle_cmd};
-// use crate::hlt_loop;
+use crate::OSINFO;
+use crate::hlt_loop;
 
 use core::result::Result::Ok;
 use core::option::Option::Some;
@@ -87,13 +88,7 @@ extern "x86-interrupt" fn double_fault_handler(
     stack_frame: InterruptStackFrame,
     error_code: u64,
 ) -> ! {
-// {
-    // println!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
-    
-    // crate::_start();
-
     panic!("EXCEPTION: DOUBLE FAULT (code {})\n{:#?}",error_code, stack_frame);
-    // crate::_start();
 }
 
 
@@ -108,6 +103,16 @@ extern "x86-interrupt" fn page_fault_handler(
     println!("Accessed Address: {:?}", Cr2::read());
     println!("Error Code: {:?}", error_code);
     println!("{:#?}", stack_frame);
+    // crate::kernel_main(OSINFO.lock().bootinfo);
+
+    // read from it to dump some bytes
+    // TODO: convert this dump functionality into a macro?
+    unsafe {
+        for i in 0..32 {
+            let ptr = stack_frame.instruction_pointer.as_u64() + i;
+            print!("{:#04x} ", *(ptr as *mut u8));
+        }
+    }
     hlt_loop();
 }
 
@@ -269,6 +274,13 @@ extern "x86-interrupt" fn segment_not_present_handler (
 
     println!("EXCEPTION: segment_not_present: errcode {}", ec);
     println!("{:#?}", stack_frame);
+    // read from it to dump some bytes
+    unsafe {
+        for i in 0..32 {
+            let ptr = stack_frame.instruction_pointer.as_u64() + i;
+            print!("{:#04x} ", *(ptr as *mut u8));
+        }
+    }
 }
 
 
