@@ -1,6 +1,6 @@
 use crate::vga_buffer::{BUFFER_WIDTH};
 use crate::strutils::{strcmpl};
-use crate::{print, println};
+use crate::{print, println, OSINFO};
 
 
 pub const PROMPT: char = '>';
@@ -18,6 +18,7 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
     		"help: show help\n",
     		"break: trigger breakpoint (c3)\n",
     		"pagefault: trigger pagefault\n",
+    		"memregions: show mem regions from boot info\n",
     		)
 		)
 
@@ -35,6 +36,13 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
 	    };
 
 	}
+
+	if strcmpl(input, "bootinfo", "bootinfo".chars().count()) {
+		// read memory regions
+		println!("{:?}", OSINFO.lock().bootinfo);
+
+	}
+
 
 
 
