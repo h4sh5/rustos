@@ -51,8 +51,8 @@ pub fn get_msr(msr:u32) {
             
         );
     }
-    
-    println!("lo:{:#04x} hi:{:#04x}", lo, hi);
+    println!("{:#08x}", (hi|lo) as u64);
+    println!("{:#064b}", (hi|lo) as u64);
 
 }
 

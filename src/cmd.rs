@@ -21,6 +21,7 @@ pub fn handle_cmd(input: &[char; BUFFER_WIDTH]) {
     		"pagefault: trigger pagefault\n",
     		"bootinfo: show boot info\n",
     		// "snph: trigger segment_not_present_handler\n",
+    		"msr_acpi: get MSR IA32_APIC_BASE_MSR\n",
     		"The QEMU escape key is Ctrl-Alt-G\n",
     		)
 		)
