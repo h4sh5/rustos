@@ -52,6 +52,25 @@ lazy_static! {
         idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
         idt.page_fault.set_handler_fn(page_fault_handler);
 
+        // rest of the handlers to prevent double faults
+        idt.divide_error.set_handler_fn(divide_error_handler);
+        idt.debug.set_handler_fn(debug_handler);
+        idt.non_maskable_interrupt.set_handler_fn(non_maskable_interrupt_handler);
+        idt.overflow.set_handler_fn(overflow_handler);
+        idt.bound_range_exceeded.set_handler_fn(bound_range_exceeded_handler);
+        idt.invalid_opcode.set_handler_fn(invalid_opcode_handler);
+        idt.device_not_available.set_handler_fn(device_not_available_handler);
+        idt.invalid_tss.set_handler_fn(invalid_tss_handler);
+        idt.segment_not_present.set_handler_fn(segment_not_present_handler);
+        idt.stack_segment_fault.set_handler_fn(stack_segment_fault_handler);
+        idt.general_protection_fault.set_handler_fn(general_protection_fault_handler);
+        idt.x87_floating_point.set_handler_fn(x87_floating_point_handler);
+        idt.alignment_check.set_handler_fn(alignment_check_handler);
+        idt.simd_floating_point.set_handler_fn(simd_floating_point_handler);
+        idt.virtualization.set_handler_fn(virtualization_handler);
+        // idt.vmm_communication_exception.set_handler_fn(vmm_communication_exception_handler);
+        idt.security_exception.set_handler_fn(security_exception_handler);
+
         idt
     };
 }
@@ -183,6 +202,143 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
             .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
     }
 }
+
+
+extern "x86-interrupt" fn divide_error_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: Divide Error");
+    println!("{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn debug_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: Debug Error");
+    println!("{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn non_maskable_interrupt_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: non_maskable_interrupt Error");
+    println!("{:#?}", stack_frame);
+}
+
+
+extern "x86-interrupt" fn overflow_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: Overflow Error");
+    println!("{:#?}", stack_frame);
+}
+
+
+extern "x86-interrupt" fn bound_range_exceeded_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: bound_range_exceeded");
+    println!("{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn invalid_opcode_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: invalid_opcode");
+    println!("{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn device_not_available_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: device_not_available");
+    println!("{:#?}", stack_frame);
+}
+
+
+
+extern "x86-interrupt" fn invalid_tss_handler (
+    stack_frame: InterruptStackFrame, ec:u64) {
+
+    println!("EXCEPTION: invalid_tss: errcode {}",ec);
+    println!("{:#?}", stack_frame);
+}
+
+
+
+extern "x86-interrupt" fn segment_not_present_handler (
+    stack_frame: InterruptStackFrame, ec:u64) {
+
+    println!("EXCEPTION: segment_not_present: errcode {}", ec);
+    println!("{:#?}", stack_frame);
+}
+
+
+extern "x86-interrupt" fn stack_segment_fault_handler (
+    stack_frame: InterruptStackFrame, ec:u64) {
+
+    println!("EXCEPTION: stack_segment_fault: errcode {}", ec);
+    println!("{:#?}", stack_frame);
+}
+
+
+extern "x86-interrupt" fn general_protection_fault_handler (
+    stack_frame: InterruptStackFrame, ec:u64) {
+
+    println!("EXCEPTION: general_protection_fault errcode {}", ec);
+    println!("{:#?}", stack_frame);
+}
+
+
+extern "x86-interrupt" fn x87_floating_point_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: x87_floating_point");
+    println!("{:#?}", stack_frame);
+}
+
+
+extern "x86-interrupt" fn alignment_check_handler (
+    stack_frame: InterruptStackFrame, ec:u64) {
+
+    println!("EXCEPTION: alignment_check errcode {}", ec);
+    println!("{:#?}", stack_frame);
+}
+
+
+
+
+extern "x86-interrupt" fn simd_floating_point_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: simd_floating_point");
+    println!("{:#?}", stack_frame);
+}
+
+
+extern "x86-interrupt" fn virtualization_handler (
+    stack_frame: InterruptStackFrame) {
+
+    println!("EXCEPTION: virtualization");
+    println!("{:#?}", stack_frame);
+}
+
+// extern "x86-interrupt" fn vmm_communication_exception_handler (
+//     stack_frame: InterruptStackFrame) {
+
+//     println!("EXCEPTION: vmm_communication_exception");
+//     println!("{:#?}", stack_frame);
+// }
+
+extern "x86-interrupt" fn security_exception_handler (
+    stack_frame: InterruptStackFrame, ec:u64) {
+
+    println!("EXCEPTION: security_exception errcode {}", ec);
+    println!("{:#?}", stack_frame);
+}
+
+
+
 
 // #[test_case]
 // fn test_breakpoint_exception() {
